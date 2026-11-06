@@ -2319,7 +2319,7 @@
           showPlaceholder();
         } else {
           thumb.classList.remove('mi-thumb-placeholder');
-          image.addEventListener('error', showPlaceholder, { once: true });
+          image.addEventListener('error', showPlaceholder, {once: true});
           if (image.complete && image.naturalWidth === 0) showPlaceholder();
         }
       });
@@ -2440,7 +2440,7 @@
             showSub(d, opt.dataset.sub);
             closeDrops();
             const wrap = document.querySelector('.menu-wrap');
-            if (wrap) setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+            if (wrap) setTimeout(() => wrap.scrollIntoView({behavior: 'smooth', block: 'start'}), 60);
           });
         });
         const first = d.querySelector('.tab-opt');
@@ -2477,7 +2477,7 @@
       });
 
       navList?.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => { setNavOpen(false); });
+        a.addEventListener('click', () => {setNavOpen(false);});
       });
 
       // Rasmni kattalashtirib ko'rsatish (lightbox)
