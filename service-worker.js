@@ -1,17 +1,38 @@
-const CACHE = "menyu-v2";
+const CACHE = "menyu-v3";
+const EXT = "(?:jpe?g|png|webp|gif|svg|avif)";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE);
-      await cache.add("/");
-      // sahifadagi barcha rasmlarni topib keshlaymiz
       const res = await fetch("/");
+      await cache.put("/", res.clone());
       const html = await res.text();
-      const doc = html.match(/src=["']([^"']+\.(?:jpg|jpeg|png|webp|gif|svg))["']/gi) || [];
-      const urls = doc.map((s) => s.replace(/^src=["']/i, "").replace(/["']$/, ""));
+
+      const found = new Set();
+      const patterns = [
+        new RegExp('"([^"]+?\\.' + EXT + ')"', "gi"),
+        new RegExp("'((?:[^'\\\\]|\\\\.)+?\\.' + EXT + ')'", "gi"),
+        new RegExp("`([^`]+?\\." + EXT + ")`", "gi"),
+      ];
+      for (const re of patterns) {
+        let m;
+        while ((m = re.exec(html))) {
+          const u = m[1].replace(/\\'/g, "'").trim();
+          if (u.length < 200 && !/[\n<>]/.test(u) && !u.startsWith("data:") && !u.startsWith("http")) {
+            found.add(u);
+          }
+        }
+      }
+
       await Promise.all(
-        urls.map((u) => cache.add(u).catch(() => {}))
+        [...found].map(async (u) => {
+          try {
+            const req = new Request(new URL(u, self.location.origin + "/").href);
+            const r = await fetch(req);
+            if (r.ok) await cache.put(req, r);
+          } catch (err) {}
+        })
       );
     })()
   );
